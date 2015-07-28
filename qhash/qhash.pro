@@ -20,3 +20,6 @@ HEADERS  += mainwindow.h \
     hasherthread.h
 
 FORMS    += mainwindow.ui
+
+RESOURCES += \
+    qhash.qrc

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>pixmaps/qhash.png</file>
+    </qresource>
+</RCC>
