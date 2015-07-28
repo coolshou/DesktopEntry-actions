@@ -39,6 +39,7 @@ MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
                     myFile.close();
                 }
                 topLevel->setText(1,  QString::number(size)); //size
+                //TODO: add hashthread?
 
                 ui->treeWidget_files->addTopLevelItem(topLevel);
                 //TODO: parser many file will need times => move to thread?
@@ -48,7 +49,8 @@ MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
     } else {
     }
 
-    //
+    //signal/solt of button push
+
     delete GlobalSettings;
 }
 
