@@ -25,6 +25,7 @@ QCryptographicHash::Sha3_384	9	Generate an SHA3-384 hash sum. Introduced in Qt 5
 QCryptographicHash::Sha3_512	10	Generate an SHA3-512 hash sum. Introduced in Qt 5.1
 
  */
+
 HasherThread::HasherThread(QObject *parent , const QString &filename, QCryptographicHash::Algorithm hMode) :
     QThread(parent)
 {

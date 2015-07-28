@@ -88,7 +88,34 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QTreeView" name="treeView_files"/>
+       <widget class="QTreeWidget" name="treeWidget_files">
+        <property name="columnCount">
+         <number>4</number>
+        </property>
+        <attribute name="headerDefaultSectionSize">
+         <number>100</number>
+        </attribute>
+        <column>
+         <property name="text">
+          <string notr="true">1</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string notr="true">2</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string notr="true">3</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string notr="true">4</string>
+         </property>
+        </column>
+       </widget>
       </item>
      </layout>
     </item>
