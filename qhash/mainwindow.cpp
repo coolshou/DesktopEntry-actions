@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QFile>
 #include <QDebug>
 
 MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
@@ -30,7 +31,14 @@ MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
                 qDebug() << "argv[" <<  i << "]:" << argv[i];
 
                 QTreeWidgetItem * topLevel = new QTreeWidgetItem();
-                topLevel->setText(0,  argv[i]);
+                topLevel->setText(0,  argv[i]); //name
+                int size = 0;
+                QFile myFile(argv[i]);
+                if (myFile.open(QIODevice::ReadOnly)){
+                    size = myFile.size();  //when file does open.
+                    myFile.close();
+                }
+                topLevel->setText(1,  QString::number(size)); //size
 
                 ui->treeWidget_files->addTopLevelItem(topLevel);
                 //TODO: parser many file will need times => move to thread?
