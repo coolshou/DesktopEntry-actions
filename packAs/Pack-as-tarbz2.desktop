@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Action
+Tooltip=Pack files as tar.bz2 at here
+Name=Pack as tar.bz2
+Name[zh_TW]=壓縮為 tar.bz2
+Profiles=profile-tarbz2
+Icon=file-roller
+
+[X-Action-Profile profile-tarbz2]
+Name=Pack as tar.bz2 
+Exec=file-roller -a %f.tar.bz2 %F
+

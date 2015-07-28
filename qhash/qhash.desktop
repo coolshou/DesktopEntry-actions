@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Action
+Tooltip=QT base check/calculate checksum
+Name=qhash
+Name[zh_TW]=qhash
+Profiles=profile-qhash
+Icon=qhash
+
+[X-Action-Profile profile-qhash]
+Name=qhash
+Exec=qhash %F
