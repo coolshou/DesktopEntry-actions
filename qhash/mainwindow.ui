@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
+    <width>800</width>
     <height>300</height>
    </rect>
   </property>
@@ -22,8 +22,17 @@
     <height>300</height>
    </size>
   </property>
+  <property name="font">
+   <font>
+    <family>Sans</family>
+   </font>
+  </property>
   <property name="windowTitle">
-   <string>Hash</string>
+   <string>QHash</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="qhash.qrc">
+    <normaloff>:/pixmaps/qhash.png</normaloff>:/pixmaps/qhash.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="sizePolicy">
@@ -57,7 +66,7 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
+          <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0">
            <property name="sizeConstraint">
             <enum>QLayout::SetDefaultConstraint</enum>
            </property>
@@ -73,6 +82,19 @@
             </layout>
            </item>
            <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
             <widget class="QPushButton" name="pushButton_hash">
              <property name="text">
               <string>hash</string>
@@ -86,30 +108,51 @@
       </item>
       <item row="0" column="0">
        <widget class="QTreeWidget" name="treeWidget_files">
+        <property name="sizeAdjustPolicy">
+         <enum>QAbstractScrollArea::AdjustToContents</enum>
+        </property>
+        <property name="horizontalScrollMode">
+         <enum>QAbstractItemView::ScrollPerPixel</enum>
+        </property>
+        <property name="allColumnsShowFocus">
+         <bool>false</bool>
+        </property>
         <property name="columnCount">
          <number>4</number>
         </property>
         <attribute name="headerDefaultSectionSize">
-         <number>100</number>
+         <number>150</number>
+        </attribute>
+        <attribute name="headerHighlightSections">
+         <bool>true</bool>
         </attribute>
         <column>
          <property name="text">
-          <string notr="true">1</string>
+          <string>Name</string>
+         </property>
+         <property name="textAlignment">
+          <set>AlignHCenter|AlignVCenter|AlignCenter</set>
          </property>
         </column>
         <column>
          <property name="text">
-          <string notr="true">2</string>
+          <string>Size</string>
+         </property>
+         <property name="textAlignment">
+          <set>AlignRight|AlignVCenter</set>
          </property>
         </column>
         <column>
          <property name="text">
-          <string notr="true">3</string>
+          <string>Status</string>
+         </property>
+         <property name="textAlignment">
+          <set>AlignHCenter|AlignVCenter|AlignCenter</set>
          </property>
         </column>
         <column>
          <property name="text">
-          <string notr="true">4</string>
+          <string>Checksum</string>
          </property>
         </column>
        </widget>
@@ -128,6 +171,8 @@
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="qhash.qrc"/>
+ </resources>
  <connections/>
 </ui>

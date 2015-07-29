@@ -34,31 +34,37 @@ HasherThread::HasherThread(QObject *parent , const QString &filename, QCryptogra
     fullFileName = filename;
 }
 
+void HasherThread::setIdx(int idx)
+{
+    treeitemIdx = idx;
+}
+
 void HasherThread::run()
 {
     qint64 iReadCount=0;
     QFile f( fullFileName );
     if ( !f.open(QIODevice::ReadOnly) ) {
-        emit error( QString("Unable to open file %1").arg(fullFileName) );
+        emit error(treeitemIdx,  QString("Unable to open file %1").arg(fullFileName) );
         return;
     }
 
     hasher->reset();
     //file size
-    emit fileSize(f.size());
+    //emit fileSize(treeitemIdx, f.size());
 
-    char buffer[16*1024];
+    //TODO: buffer size? best value?
+    char buffer[1024*1024];
     qint64 count;
     do {
         count = f.read( buffer, sizeof(buffer) );
         if ( count == -1 ) {
-            emit error( QString("Read error") );
+            emit error(treeitemIdx,  QString("Read error") );
             break;
         }
         //TODO: read position
         hasher->addData( buffer, count );
         iReadCount = iReadCount + count;
-        emit fileReadPos(iReadCount);
+        emit fileReadPos(treeitemIdx, iReadCount);
     } while( !f.atEnd() );
     //add by filename
     /*
@@ -70,6 +76,6 @@ void HasherThread::run()
         }
     }
      */
-    emit completed( hasher->result().toHex() );
+    emit completed(treeitemIdx, hasher->result().toHex().toUpper() );
     f.close();
 }

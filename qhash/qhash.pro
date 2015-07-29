@@ -14,10 +14,13 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    hasherthread.cpp
+    hasherthread.cpp \
+    progressbardelegate.cpp
 
 HEADERS  += mainwindow.h \
-    hasherthread.h
+    hasherthread.h \
+    progressbardelegate.h \
+    customRoles.h
 
 FORMS    += mainwindow.ui
 

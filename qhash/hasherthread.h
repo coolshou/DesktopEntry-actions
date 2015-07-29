@@ -11,12 +11,13 @@ class HasherThread : public QThread
 public:
     explicit HasherThread(QObject *parent = 0, const QString &filename="", QCryptographicHash::Algorithm hMode = QCryptographicHash::Md5);
     void run();
+    void setIdx(int idx); //treeitem index
 
 signals:
-    void error(QString msg);
-    void completed(QString msg);
-    void fileSize(qint64);
-    void fileReadPos(qint64);
+    void error(int idx, QString msg);
+    void completed(int idx, QString msg);
+    void fileSize(int idx, qint64 iSize);
+    void fileReadPos(int idx, qint64 iPos);
 
 public slots:
 
@@ -24,6 +25,8 @@ private:
    QCryptographicHash *hasher;
    QString fullFileName;
    QCryptographicHash::Algorithm hashMode;
+   int treeitemIdx;
+
 };
 
 #endif // HASHERTHREAD_H
