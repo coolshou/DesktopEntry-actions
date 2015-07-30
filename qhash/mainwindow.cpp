@@ -7,12 +7,53 @@
 #include <QMenu>
 #include <QFileDialog>
 
+QString SUPPORT_Filter("md5 files (*.md5);;sha files (*.sha)");
+QString DEFAULT_Filter("md5 files (*.md5)");
+
+//return toplevelItem index number
+int MainWindow::addTopLevelItem(QString sName )
+{
+    int idx;
+    QTreeWidgetItem * topLevelitem = new QTreeWidgetItem();
+    topLevelitem->setText(COL_NAME, sName); //name
+    int size = 0;
+    QFile myFile(sName);
+    if (myFile.open(QIODevice::ReadOnly)){
+        size = myFile.size();  //when file does open.
+
+        topLevelitem->setText(COL_SIZE,  QString::number(size)); //size
+        topLevelitem->setTextAlignment(COL_SIZE, Qt::AlignRight);
+        //TODO: progressbar
+        //add hasherThread, TODO: QCryptographicHash type
+       HasherThread * hasherThread = new HasherThread( this ,  myFile.fileName(), QCryptographicHash::Md5);
+       QVariant v;
+       v.setValue(hasherThread);
+        topLevelitem->setData(COL_STATUS, MyHashThreadRole, v);
+        topLevelitem->setData(COL_STATUS, MyMinimumRole, 0);
+        topLevelitem->setData(COL_STATUS, MyMaximumRole, size);
+        topLevelitem->setText(COL_STATUS,  "TEST"); //terst
+
+        //connect( hasherThread, SIGNAL(error(const QString &)), ui->treeWidget_files, SLOT() );
+        connect( hasherThread, SIGNAL(error(int, const QString &)), this, SLOT(setStatus(int,QString)) );
+        connect( hasherThread, SIGNAL(fileReadPos(int,qint64)), this, SLOT(setProgress(int,qint64)) );
+        //TODO: calc mode or checkmode
+        connect( hasherThread, SIGNAL(completed(int, const QString &)), this, SLOT(setChecksum(int,QString)) );
+
+        ui->treeWidget_files->addTopLevelItem(topLevelitem);
+        idx = ui->treeWidget_files->indexOfTopLevelItem(topLevelitem);
+        hasherThread->setIdx(idx);
+
+        myFile.close();
+    }
+    return idx;
+}
+
 MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     isCheckMode=0;
-    int i, idx;
+    int i;
     int iParser=0;
     ui->setupUi(this);
     //read config file
@@ -29,6 +70,8 @@ MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
         //qDebug() << "argv[1]:" <<  argv[1];
         if (argc==2) {
             //TODO: only 1 file :expect md5 file contain filelist for check
+            qDebug() <<"parserChechsumFile:" << argv[1];
+
            iParser = parserChechsumFile(argv[1]);
         }
         if ( iParser <= 0 ) {
@@ -36,36 +79,7 @@ MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
             for(i =1; i<argc; i++) {
                 qDebug() << "argv[" <<  i << "]:" << argv[i];
 
-                QTreeWidgetItem * topLevelitem = new QTreeWidgetItem();
-                topLevelitem->setText(COL_NAME,  argv[i]); //name
-                int size = 0;
-                QFile myFile(argv[i]);
-                if (myFile.open(QIODevice::ReadOnly)){
-                    size = myFile.size();  //when file does open.
-
-                    topLevelitem->setText(COL_SIZE,  QString::number(size)); //size
-                    topLevelitem->setTextAlignment(COL_SIZE, Qt::AlignRight);
-                    //TODO: progressbar
-                    //add hasherThread, TODO: QCryptographicHash type
-                   HasherThread * hasherThread = new HasherThread( this ,  myFile.fileName(), QCryptographicHash::Md5);
-                   QVariant v;
-                   v.setValue(hasherThread);
-                    topLevelitem->setData(COL_STATUS, MyHashThreadRole, v);
-                    topLevelitem->setData(COL_STATUS, MyMinimumRole, 0);
-                    topLevelitem->setData(COL_STATUS, MyMaximumRole, size);
-                    topLevelitem->setText(COL_STATUS,  "TEST"); //terst
-
-                    //connect( hasherThread, SIGNAL(error(const QString &)), ui->treeWidget_files, SLOT() );
-                    connect( hasherThread, SIGNAL(error(int, const QString &)), this, SLOT(setStatus(int,QString)) );
-                    connect( hasherThread, SIGNAL(fileReadPos(int,qint64)), this, SLOT(setProgress(int,qint64)) );
-                    connect( hasherThread, SIGNAL(completed(int, const QString &)), this, SLOT(setChecksum(int,QString)) );
-
-                    ui->treeWidget_files->addTopLevelItem(topLevelitem);
-                    idx = ui->treeWidget_files->indexOfTopLevelItem(topLevelitem);
-                    hasherThread->setIdx(idx);
-
-                    myFile.close();
-                }
+                addTopLevelItem( argv[i]);
                 //TODO: parser many file will need times => move to thread?
                 QApplication::processEvents();
             }
@@ -90,31 +104,61 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+/* md5sum file content format
+ * md5sum<space><space>filename
+ * second <space> indicate text mode
+ * use <asterisk> for binary mode
+ * line must end with UNIX line ending
+*/
+void MainWindow::saveMD5file(QString filename)
+{
+    QFile f( filename);
+
+    f.open( QIODevice::WriteOnly );//TODO: check file writeable
+    //TODO store data in f
+    QTextStream out(&f);
+    QTreeWidget *tree = ui->treeWidget_files;
+    for (int i=0;i<tree->topLevelItemCount();i++){
+        QTreeWidgetItem * topLevelitem = tree->topLevelItem(i);
+//            qDebug() << "name:" <<topLevelitem->text(COL_NAME);
+//            qDebug() << "checksum:" << topLevelitem->text(COL_CHECKSUM);
+        out << topLevelitem->text(COL_CHECKSUM) << "  " << topLevelitem->text(COL_NAME) << endl;
+    }
+    f.close();
+}
+
 void MainWindow::save()
 {
     //save shecksum to file
     qDebug() << "Save to file";
-    //TODO:
-    QString filename = QFileDialog::getSaveFileName( this, "Save file", "Choose a filename to save checksum", ".md5" );
-    if (filename != "") {
-        QFile f( filename + ".md5" );
+    //TODO: check we do have checksum to save and all hasherthread had done it's job
 
-        f.open( QIODevice::WriteOnly );
-        //TODO store data in f
-        QTreeWidget *tree = ui->treeWidget_files;
-        for (i=0;i<tree->topLevelItemCount();i++){
-            QTreeWidgetItem * topLevelitem = tree>topLevelItem(i);
-            qDebug() << topLevelitem->text(COL_NAME);
+    QFileDialog *fileDialog = new QFileDialog;
+//    fileDialog->setDefaultSuffix("md5");
+
+    QString filename = fileDialog->getSaveFileName( this, "Save file", QDir::currentPath(), SUPPORT_Filter , &DEFAULT_Filter);
+    if (! (filename.endsWith(".md5", Qt::CaseInsensitive) ||
+            filename.endsWith(".sha", Qt::CaseInsensitive) )) {
+        //TODO: default ext from setting option
+        filename += ".md5"; //default
+    }
+    if (filename != "") {
+        if (filename.endsWith(".md5",Qt::CaseInsensitive)) {
+            saveMD5file(filename);
+        } else {
+            qDebug() << "TODO: save other format of shecksum file: " << filename;
         }
-        f.close();
     }
 }
+
 void MainWindow::load()
 {
-    //save shecksum to file
-    qDebug() << "Load from file";
-
+    //Load shecksum from file
+    qDebug() << "TODO: Load from file";
+    //TODO: file select
+    // parserChechsumFile(QString sFileName);
 }
+
 void MainWindow::prepareRightClickMenu( const QPoint & pos )
 {
     QTreeWidget *tree = ui->treeWidget_files;
@@ -129,8 +173,7 @@ void MainWindow::prepareRightClickMenu( const QPoint & pos )
     //newAct->setStatusTip(tr("Save"));
     //TODO: only finish checksum then can be save
     connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
-
-
+    //menu
     QMenu menu(this);
     menu.addAction(loadAct);
     menu.addAction(saveAct);
@@ -165,6 +208,37 @@ void  MainWindow::setConfigFile(QString sFileName)
     configFile=sFileName;
 }
 
+
+int MainWindow::parserMD5File(QString sFileName)
+{
+    //read file line by line
+    QFile f(sFileName);
+    //TODO: check file can be read?
+    f.open( QIODevice::ReadOnly );
+    QTextStream in(&f);
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        //TODO: binary mode
+        QStringList fields = line.split(' ');
+        qDebug() << "fields" << fields;
+        if (fields.size() == 3) {
+            qDebug() << "0:" << fields.at(0); //checksum
+            qDebug() << "1:" << fields.at(1);
+            qDebug() << "2:" << fields.at(2);//filename
+
+            int idx =  addTopLevelItem( fields.at(2));
+            setChecksum(idx, fields.at(0));
+            /*
+            int row = fields.takeFirst().toInt();
+            int column = fields.takeFirst().toInt();
+            setFormula(row, column, fields.join(' '));
+            */
+        }
+
+    }
+    return 1;
+}
+
 /*
  * -1 : error happen
  * 0:
@@ -172,9 +246,18 @@ void  MainWindow::setConfigFile(QString sFileName)
 */
 int  MainWindow::parserChechsumFile(QString sFileName)
 {
+    int rs=0;
     //configFile=sFileName;
     isCheckMode =1;
-    return 0;
+
+    if (sFileName.endsWith(".md5", Qt::CaseInsensitive)) {
+        rs = parserMD5File(sFileName);
+    } else {
+        qDebug() << "TODO: parser file: " << sFileName;
+        rs = 0;
+    }
+
+    return rs;
 }
 
 void MainWindow::myDebug(QString msg)
@@ -199,12 +282,12 @@ void MainWindow::setChecksum(int idx, QString chksum)
        QTreeWidgetItem * topLevelitem = ui->treeWidget_files->topLevelItem(idx);
        topLevelitem->setText(COL_CHECKSUM,chksum);
        if (isCheckMode) {
+           //TODO: checkmode?
         topLevelitem->setTextColor(COL_CHECKSUM,Qt::gray);
        } else {
-       //TODO: checkmode?
+         //calc mode?
 
        }
-
        //TODO: update status
 
 }

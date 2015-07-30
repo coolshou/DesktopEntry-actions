@@ -51,8 +51,10 @@ private:
                             QCryptographicHash::Algorithm hashAlgorithm);
     QString configFile; //TODO
     int isCheckMode; //0: calculate mode, 1: check mode
+    int addTopLevelItem(QString sName );
     int  parserChechsumFile(QString sFileName);
-
+    int parserMD5File(QString sFileName);
+    void saveMD5file(QString filename);
     bool startHash();
 
 };
