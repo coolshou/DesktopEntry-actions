@@ -38,14 +38,21 @@ public slots:
     void setStatus(int idx, QString sMsg);
     void setProgress(int idx, qint64 iPos);
     void setChecksum(int idx, QString chksum);
+    void save();
+    void load();
+
+private slots:
     void myDebug(QString msg);
+    void prepareRightClickMenu( const QPoint & pos );
 
 private:
     Ui::MainWindow *ui;
     QByteArray fileChecksum(const QString &fileName,
                             QCryptographicHash::Algorithm hashAlgorithm);
     QString configFile; //TODO
+    int isCheckMode; //0: calculate mode, 1: check mode
     int  parserChechsumFile(QString sFileName);
+
     bool startHash();
 
 };

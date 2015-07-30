@@ -4,11 +4,14 @@
 #include <QFile>
 #include <QDebug>
 #include <QVariant>
+#include <QMenu>
+#include <QFileDialog>
 
 MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    isCheckMode=0;
     int i, idx;
     int iParser=0;
     ui->setupUi(this);
@@ -43,18 +46,16 @@ MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
                     topLevelitem->setText(COL_SIZE,  QString::number(size)); //size
                     topLevelitem->setTextAlignment(COL_SIZE, Qt::AlignRight);
                     //TODO: progressbar
-                    //TODO: add hashthread?
+                    //add hasherThread, TODO: QCryptographicHash type
                    HasherThread * hasherThread = new HasherThread( this ,  myFile.fileName(), QCryptographicHash::Md5);
                    QVariant v;
                    v.setValue(hasherThread);
                     topLevelitem->setData(COL_STATUS, MyHashThreadRole, v);
-                    //topLevelitem->setTextAlignment(COL_STATUS, Qt::AlignCenter);
                     topLevelitem->setData(COL_STATUS, MyMinimumRole, 0);
                     topLevelitem->setData(COL_STATUS, MyMaximumRole, size);
-
+                    topLevelitem->setText(COL_STATUS,  "TEST"); //terst
 
                     //connect( hasherThread, SIGNAL(error(const QString &)), ui->treeWidget_files, SLOT() );
-                    //connect( hasherThread, SIGNAL(completed(int, const QString &)), this, SLOT(myDebug(const QString &)) );
                     connect( hasherThread, SIGNAL(error(int, const QString &)), this, SLOT(setStatus(int,QString)) );
                     connect( hasherThread, SIGNAL(fileReadPos(int,qint64)), this, SLOT(setProgress(int,qint64)) );
                     connect( hasherThread, SIGNAL(completed(int, const QString &)), this, SLOT(setChecksum(int,QString)) );
@@ -73,6 +74,10 @@ MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
         //
     }
 
+    //add right click menu to ui->treeWidget_files
+    ui->treeWidget_files->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->treeWidget_files,SIGNAL(customContextMenuRequested(const QPoint&)),
+            this,SLOT(prepareRightClickMenu(const QPoint&)));
 
     //signal/solt of button push
     QObject::connect(ui->pushButton_hash,SIGNAL(clicked()),this,SLOT(doHash()));
@@ -85,6 +90,54 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::save()
+{
+    //save shecksum to file
+    qDebug() << "Save to file";
+    //TODO:
+    QString filename = QFileDialog::getSaveFileName( this, "Save file", "Choose a filename to save checksum", ".md5" );
+    if (filename != "") {
+        QFile f( filename + ".md5" );
+
+        f.open( QIODevice::WriteOnly );
+        //TODO store data in f
+        QTreeWidget *tree = ui->treeWidget_files;
+        for (i=0;i<tree->topLevelItemCount();i++){
+            QTreeWidgetItem * topLevelitem = tree>topLevelItem(i);
+            qDebug() << topLevelitem->text(COL_NAME);
+        }
+        f.close();
+    }
+}
+void MainWindow::load()
+{
+    //save shecksum to file
+    qDebug() << "Load from file";
+
+}
+void MainWindow::prepareRightClickMenu( const QPoint & pos )
+{
+    QTreeWidget *tree = ui->treeWidget_files;
+
+    //QTreeWidgetItem *nd = tree->itemAt( pos );
+    //qDebug()<<pos<<nd->text(0);
+    //TODO: load checksum file
+    QAction *loadAct = new QAction(QIcon(":/pixmaps/load.png"), tr("&Load"), this);
+    connect(loadAct, SIGNAL(triggered()), this, SLOT(load()));
+
+    QAction *saveAct = new QAction(QIcon(":/pixmaps/save.png"), tr("&Save"), this);
+    //newAct->setStatusTip(tr("Save"));
+    //TODO: only finish checksum then can be save
+    connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
+
+
+    QMenu menu(this);
+    menu.addAction(loadAct);
+    menu.addAction(saveAct);
+
+    //QPoint pt(pos);
+    menu.exec( tree->mapToGlobal(pos) );
+}
 void MainWindow::doHash()
 {
     //qDebug() << "doHash";
@@ -107,22 +160,6 @@ bool MainWindow::startHash()
     return true;
 }
 
-/*
-// Returns empty QByteArray() on failure. TODO: run in thread?
-QByteArray MainWindow::fileChecksum(const QString &fileName,
-                        QCryptographicHash::Algorithm hashAlgorithm)
-{
-    QFile f(fileName);
-    if (f.open(QFile::ReadOnly)) {
-        QCryptographicHash hash(hashAlgorithm);
-        if (hash.addData(&f)) {
-            return hash.result();
-        }
-    }
-    return QByteArray();
-}
-*/
-
 void  MainWindow::setConfigFile(QString sFileName)
 {
     configFile=sFileName;
@@ -136,6 +173,7 @@ void  MainWindow::setConfigFile(QString sFileName)
 int  MainWindow::parserChechsumFile(QString sFileName)
 {
     //configFile=sFileName;
+    isCheckMode =1;
     return 0;
 }
 
@@ -154,12 +192,19 @@ void MainWindow::setProgress(int idx, qint64 iPos)
 {
     //TODO: this will cause high CPU usage!!
     setStatus(idx, QString::number(iPos));
-    //TODO: update progressbar
 }
 
 void MainWindow::setChecksum(int idx, QString chksum)
 {
        QTreeWidgetItem * topLevelitem = ui->treeWidget_files->topLevelItem(idx);
-       //TODO: update status
        topLevelitem->setText(COL_CHECKSUM,chksum);
+       if (isCheckMode) {
+        topLevelitem->setTextColor(COL_CHECKSUM,Qt::gray);
+       } else {
+       //TODO: checkmode?
+
+       }
+
+       //TODO: update status
+
 }
