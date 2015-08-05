@@ -6,6 +6,8 @@
 #include <QCryptographicHash>
 #include <QStringList>
 #include <QSettings>
+#include <QCloseEvent>
+#include <QTime>
 
 #include "hasherthread.h"
 #include "progressbardelegate.h"
@@ -33,6 +35,9 @@ public:
     ~MainWindow();
     void setConfigFile(QString sFileName);
 
+signals:
+    void setThreadStop(bool bStop);
+
 public slots:
     void doHash();
     void setStatus(int idx, QString sMsg);
@@ -56,7 +61,9 @@ private:
     int parserMD5File(QString sFileName);
     void saveMD5file(QString filename);
     bool startHash();
-
+    void closeEvent(QCloseEvent *event);
+    bool checkThreadStoped();
+    void delay( int millisecondsToWait );
 };
 
 #endif // MAINWINDOW_H

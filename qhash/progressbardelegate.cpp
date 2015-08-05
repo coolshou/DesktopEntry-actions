@@ -14,11 +14,11 @@ void ProgressBarDelegate::paint( QPainter* painter, const QStyleOptionViewItem& 
         QStyleOptionProgressBar progressBarStyleOption;
         progressBarStyleOption.rect = option.rect;
         progressBarStyleOption.minimum =  index.data(MyMinimumRole).toInt();;
-        progressBarStyleOption.maximum =  index.data(MyMaximumRole).toInt();;
+        progressBarStyleOption.maximum =  index.data(MyMaximumRole).toInt();
         progressBarStyleOption.textAlignment = Qt::AlignCenter;
         progressBarStyleOption.progress = progress ;
         //TODO: change to %
-        progressBarStyleOption.text = QString( "%1" ).arg( progress);
+        progressBarStyleOption.text = QString( "%1%" ).arg( progress);
         progressBarStyleOption.textVisible = true;
 
         QApplication::style()->drawControl(QStyle::CE_ProgressBar, &progressBarStyleOption, painter );

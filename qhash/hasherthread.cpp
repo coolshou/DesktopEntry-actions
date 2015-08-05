@@ -25,6 +25,8 @@ QCryptographicHash::Sha3_384	9	Generate an SHA3-384 hash sum. Introduced in Qt 5
 QCryptographicHash::Sha3_512	10	Generate an SHA3-512 hash sum. Introduced in Qt 5.1
 
  */
+//TODO: buffer size? best value?
+#define BEST_BUFFER_SIZE 1024*1024
 
 HasherThread::HasherThread(QObject *parent , const QString &filename, QCryptographicHash::Algorithm hMode) :
     QThread(parent)
@@ -41,20 +43,20 @@ void HasherThread::setIdx(int idx)
 
 void HasherThread::run()
 {
+    qint64 size;
     qint64 iReadCount=0;
+    int iProgress=0;
+    m_stop = false;
     QFile f( fullFileName );
     if ( !f.open(QIODevice::ReadOnly) ) {
         emit error(treeitemIdx,  QString("Unable to open file %1").arg(fullFileName) );
         return;
     }
-
+    size = f.size();
     hasher->reset();
-    //file size
-    //emit fileSize(treeitemIdx, f.size());
 
-    //TODO: buffer size? best value?
-    char buffer[1024*1024];
-    qint64 count;
+    char buffer[BEST_BUFFER_SIZE];
+    int count;
     do {
         count = f.read( buffer, sizeof(buffer) );
         if ( count == -1 ) {
@@ -64,18 +66,27 @@ void HasherThread::run()
         //TODO: read position
         hasher->addData( buffer, count );
         iReadCount = iReadCount + count;
-        emit fileReadPos(treeitemIdx, iReadCount);
-    } while( !f.atEnd() );
+        //signal how many byte read
+        iProgress = ((iReadCount *100) / size);
+        emit fileReadPos(treeitemIdx, iProgress);
+    } while( !f.atEnd()  &&  (!m_stop));
+    if (!m_stop) {
+        emit completed(treeitemIdx, hasher->result().toHex().toUpper() );
+    }
+//*/
     //add by filename
     /*
-    QFile f(fileName);
-    if (f.open(QFile::ReadOnly)) {
+        //connect(&f,SIGNAL(f.),this,filehashPos() );
+
         QCryptographicHash hash(hashAlgorithm);
         if (hash.addData(&f)) {
-            return hash.result();
+            emit completed(treeitemIdx, hasher->result().toHex().toUpper() );
         }
-    }
-     */
-    emit completed(treeitemIdx, hasher->result().toHex().toUpper() );
+    //*/
     f.close();
+}
+
+void HasherThread::setStop(bool bStop)
+{
+    m_stop = bStop;
 }

@@ -20,13 +20,17 @@ signals:
     void fileReadPos(int idx, qint64 iPos);
 
 public slots:
+    void setStop(bool bStop);
+
+//private slots:
+//    void filehashPos(qint64 iPos);
 
 private:
    QCryptographicHash *hasher;
    QString fullFileName;
    QCryptographicHash::Algorithm hashMode;
    int treeitemIdx;
-
+   bool m_stop ; //flag to tell thread stop
 };
 
 #endif // HASHERTHREAD_H

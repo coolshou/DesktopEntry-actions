@@ -16,7 +16,7 @@ int MainWindow::addTopLevelItem(QString sName )
     int idx;
     QTreeWidgetItem * topLevelitem = new QTreeWidgetItem();
     topLevelitem->setText(COL_NAME, sName); //name
-    int size = 0;
+    qint64 size = 0;
     QFile myFile(sName);
     if (myFile.open(QIODevice::ReadOnly)){
         size = myFile.size();  //when file does open.
@@ -30,12 +30,13 @@ int MainWindow::addTopLevelItem(QString sName )
        v.setValue(hasherThread);
         topLevelitem->setData(COL_STATUS, MyHashThreadRole, v);
         topLevelitem->setData(COL_STATUS, MyMinimumRole, 0);
-        topLevelitem->setData(COL_STATUS, MyMaximumRole, size);
+        topLevelitem->setData(COL_STATUS, MyMaximumRole, 100);
         topLevelitem->setText(COL_STATUS,  "TEST"); //terst
 
         //connect( hasherThread, SIGNAL(error(const QString &)), ui->treeWidget_files, SLOT() );
         connect( hasherThread, SIGNAL(error(int, const QString &)), this, SLOT(setStatus(int,QString)) );
         connect( hasherThread, SIGNAL(fileReadPos(int,qint64)), this, SLOT(setProgress(int,qint64)) );
+        connect( this, SIGNAL(setThreadStop(bool)), hasherThread, SLOT(setStop(bool)) );
         //TODO: calc mode or checkmode
         connect( hasherThread, SIGNAL(completed(int, const QString &)), this, SLOT(setChecksum(int,QString)) );
 
@@ -120,8 +121,6 @@ void MainWindow::saveMD5file(QString filename)
     QTreeWidget *tree = ui->treeWidget_files;
     for (int i=0;i<tree->topLevelItemCount();i++){
         QTreeWidgetItem * topLevelitem = tree->topLevelItem(i);
-//            qDebug() << "name:" <<topLevelitem->text(COL_NAME);
-//            qDebug() << "checksum:" << topLevelitem->text(COL_CHECKSUM);
         out << topLevelitem->text(COL_CHECKSUM) << "  " << topLevelitem->text(COL_NAME) << endl;
     }
     f.close();
@@ -187,7 +186,37 @@ void MainWindow::doHash()
     startHash();
 }
 
-bool MainWindow::startHash()
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+
+    qDebug() << "closeEvent";
+    //tell all thread stop runnng
+   emit setThreadStop(true);
+    //wait
+    delay(1000);
+    //check if threadis running
+    if (checkThreadStoped()) {
+        event->accept();
+    } else {
+        qDebug() << "some thread not finish running!! can not close application now";
+        event->ignore();
+    }
+}
+
+void MainWindow::delay( int millisecondsToWait )
+{
+    QTime dieTime = QTime::currentTime().addMSecs( millisecondsToWait );
+    while( QTime::currentTime() < dieTime )
+    {
+        QCoreApplication::processEvents( QEventLoop::AllEvents, 100 );
+    }
+}
+
+/* return:
+// true : all thread stop
+// false: one of the thread not stop
+*/
+bool MainWindow::checkThreadStoped()
 {
     int i;
     //treefile toplevel item
@@ -197,8 +226,29 @@ bool MainWindow::startHash()
         //get hasherthread
         QVariant v = topLevelitem->data(COL_STATUS, MyHashThreadRole);
         HasherThread * hasherT = v.value<HasherThread*>();
-        hasherT->start();
+         qDebug() << "isRunning: " << hasherT->isRunning();
+         if (hasherT->isRunning()) {
+            return false;
+         }
         QApplication::processEvents();
+    }
+    return true;
+}
+
+bool MainWindow::startHash()
+{
+    int i;
+    //treefile toplevel item
+    if (checkThreadStoped()) {
+        for (i=0;i<ui->treeWidget_files->topLevelItemCount();i++){
+           QTreeWidgetItem * topLevelitem = ui->treeWidget_files->topLevelItem(i);
+            qDebug() << topLevelitem->text(COL_NAME);
+            //get hasherthread
+            QVariant v = topLevelitem->data(COL_STATUS, MyHashThreadRole);
+            HasherThread * hasherT = v.value<HasherThread*>();
+            hasherT->start();
+            QApplication::processEvents();
+        }
     }
     return true;
 }
