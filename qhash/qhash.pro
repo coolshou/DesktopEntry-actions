@@ -22,7 +22,8 @@ HEADERS  += mainwindow.h \
     progressbardelegate.h \
     customRoles.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    options.ui
 
 RESOURCES += \
     qhash.qrc
