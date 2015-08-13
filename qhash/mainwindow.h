@@ -12,6 +12,7 @@
 #include "hasherthread.h"
 #include "progressbardelegate.h"
 #include "customRoles.h"
+#include "ui_options.h"
 
 //define
 enum {
@@ -39,24 +40,31 @@ signals:
     void setThreadStop(bool bStop);
 
 public slots:
-    void doHash();
-    void setStatus(int idx, QString sMsg);
-    void setProgress(int idx, qint64 iPos);
-    void setChecksum(int idx, QString chksum);
-    void save();
-    void load();
+    void slot_doHash();
+    void slot_setStatus(int idx, QString sMsg);
+    void slot_setError(int idx, QString sMsg);
+    void slot_setProgress(int idx, qint64 iPos);
+    void slot_setChecksum(int idx, QString chksum);
+    void slot_save();
+    void slot_load();
 
 private slots:
-    void myDebug(QString msg);
-    void prepareRightClickMenu( const QPoint & pos );
+    void p_slot_myDebug(QString msg);
+    void p_slot_prepareRightClickMenu( const QPoint & pos );
+    void slot_openOptions();
+    void slot_saveOptions();
+    void slot_loadOptions();
 
 private:
     Ui::MainWindow *ui;
+    Ui::OptionsWindow *ui_option;
     QByteArray fileChecksum(const QString &fileName,
                             QCryptographicHash::Algorithm hashAlgorithm);
-    QString configFile; //TODO
+    QString configFile;
+    int  hashAlg;
     int isCheckMode; //0: calculate mode, 1: check mode
     int addTopLevelItem(QString sName );
+    int clearTopLevelItem();
     int  parserChechsumFile(QString sFileName);
     int parserMD5File(QString sFileName);
     void saveMD5file(QString filename);
@@ -64,6 +72,7 @@ private:
     void closeEvent(QCloseEvent *event);
     bool checkThreadStoped();
     void delay( int millisecondsToWait );
+
 };
 
 #endif // MAINWINDOW_H
