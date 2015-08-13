@@ -9,7 +9,7 @@
 #include <QFileDialog>
 
 
-QString SUPPORT_Filter("md5 files (*.md5);;sha files (*.sha)");
+QString SUPPORT_Filter("md4 files (*.md4);;md5 files (*.md5);;sha1 files (*.sha1);;sha256 files (*.sha256);;sha512 files (*.sha512)");
 QString DEFAULT_Filter("md5 files (*.md5)");
 
 int MainWindow::clearTopLevelItem()
@@ -35,7 +35,7 @@ int MainWindow::addTopLevelItem(QString sName )
         topLevelitem->setTextAlignment(COL_SIZE, Qt::AlignRight);
         //add hasherThread,
         //TODO: QCryptographicHash type
-       HasherThread * hasherThread = new HasherThread( this ,  myFile.fileName(), QCryptographicHash::Md5);
+       HasherThread * hasherThread = new HasherThread( this ,  myFile.fileName(),QCryptographicHash::Algorithm(hashAlg));
        QVariant v;
        v.setValue(hasherThread);
         topLevelitem->setData(COL_STATUS, MyHashThreadRole, v);
@@ -67,8 +67,9 @@ MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
     int i;
     int iParser=0;
     ui->setupUi(this);
-    //read config file
-    QSettings *GlobalSettings = new QSettings(configFile,QSettings::NativeFormat);
+    //load config from config file
+    slot_loadOptions();
+    //QSettings *GlobalSettings = new QSettings(configFile,QSettings::NativeFormat);
     //TODO: read config setting
     //Delegate ProgressBar
     ui->treeWidget_files->setItemDelegateForColumn(COL_STATUS, new ProgressBarDelegate(ui->treeWidget_files));
@@ -102,7 +103,7 @@ MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
     QObject::connect(ui->pushButton_hash,SIGNAL(clicked()),this,SLOT(slot_doHash()));
     connect(ui->pushButton_option,SIGNAL(clicked()),this,SLOT(slot_openOptions()));
 
-    delete GlobalSettings;
+    //delete GlobalSettings;
 }
 
 MainWindow::~MainWindow()
@@ -133,6 +134,7 @@ void MainWindow::slot_openOptions()
              ui_option->radioButton_sha512->setChecked(true);
              break;
      }
+     ui_option->buttonBox->button(ui_option->buttonBox->Cancel)->setFocus();
      //signal/slot
      connect(ui_option->buttonBox->button((QDialogButtonBox::Ok)), SIGNAL(clicked()), this, SLOT(slot_saveOptions()));
     //show options dialog
@@ -214,12 +216,14 @@ void MainWindow::slot_save()
 
     QString filename = fileDialog->getSaveFileName( this, "Save file", QDir::currentPath(), SUPPORT_Filter , &DEFAULT_Filter);
     if (! (filename.endsWith(".md5", Qt::CaseInsensitive) ||
-            filename.endsWith(".sha", Qt::CaseInsensitive) )) {
+            filename.endsWith(".sha1", Qt::CaseInsensitive) )) {
+        //TODO: md4, sha256, sha512
         //default ext from setting option
         filename += ".md5"; //default
     }
     if (filename != "") {
         if (filename.endsWith(".md5",Qt::CaseInsensitive)) {
+            //TODO: md4, sha256, sha512
             saveMD5file(filename);
         } else {
             qDebug() << "TODO: save other format of shecksum file: " << filename;
@@ -345,7 +349,7 @@ void  MainWindow::setConfigFile(QString sFileName)
     configFile=sFileName;
 }
 
-
+//TODO: md4, sha1, sha256, sha512 checksum file format?
 int MainWindow::parserMD5File(QString sFileName)
 {
       int idx ;
