@@ -8,6 +8,7 @@
 #include <QSettings>
 #include <QCloseEvent>
 #include <QTime>
+#include <QClipboard>
 
 #include "hasherthread.h"
 #include "progressbardelegate.h"
@@ -47,6 +48,7 @@ public slots:
     void slot_setChecksum(int idx, QString chksum);
     void slot_save();
     void slot_load();
+    void slot_copyChecksum();
 
 private slots:
     void p_slot_myDebug(QString msg);
@@ -58,6 +60,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     Ui::OptionsWindow *ui_option;
+    QClipboard* clipboard;
     QByteArray fileChecksum(const QString &fileName,
                             QCryptographicHash::Algorithm hashAlgorithm);
     QString configFile;

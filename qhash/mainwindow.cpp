@@ -69,6 +69,11 @@ MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
     ui->setupUi(this);
     //load config from config file
     slot_loadOptions();
+    clipboard =  QApplication::clipboard();
+    /*
+    QString originalText = clipboard->text();
+    clipboard->setText( newText );
+    */
     //QSettings *GlobalSettings = new QSettings(configFile,QSettings::NativeFormat);
     //TODO: read config setting
     //Delegate ProgressBar
@@ -230,7 +235,12 @@ void MainWindow::slot_save()
         }
     }
 }
-
+// copy checksum value
+void MainWindow::slot_copyChecksum()
+{
+    QTreeWidget *tree = ui->treeWidget_files;
+    clipboard->setText(tree->currentItem()->text(tree->currentColumn()));
+}
 //load checksum file
 void MainWindow::slot_load()
 {
@@ -251,6 +261,7 @@ void MainWindow::slot_load()
 
 void MainWindow::p_slot_prepareRightClickMenu( const QPoint & pos )
 {
+    int curCol;
     QTreeWidget *tree = ui->treeWidget_files;
     //load
     QAction *loadAct = new QAction(QIcon(":/pixmaps/load.png"), tr("&Load"), this);
@@ -258,15 +269,36 @@ void MainWindow::p_slot_prepareRightClickMenu( const QPoint & pos )
     //save
     QAction *saveAct = new QAction(QIcon(":/pixmaps/save.png"), tr("&Save"), this);
     connect(saveAct, SIGNAL(triggered()), this, SLOT(slot_save()));
+    //add menu for copy checksum to clipboard
+    curCol = tree->currentColumn();
+    //if (curCol == COL_CHECKSUM) {
+    //copy
+        QAction *copyAct = new QAction(QIcon(":/pixmaps/copy.png"), tr("&Copy"), this);
+        connect(copyAct, SIGNAL(triggered()), this, SLOT(slot_copyChecksum()));
+    //}
+    //QTreeWidgetItem *itm =   tree->itemAt(pos.x(),pos.y);
+    //qDebug() << "QTreeWidgetItem" <<itm->text();
     //TODO: add files menu item & action
+
+    //menu, first time right click will not show menu
+    /*
+    tree->setContextMenuPolicy(Qt::ActionsContextMenu);
+    tree->addAction(loadAct);
+    tree->addAction(saveAct);
+    */
 
     //menu
     QMenu menu(this);
+    if (curCol == COL_CHECKSUM) {
+        menu.addAction(copyAct);
+        //TODO: add sepelate bar
+    }
+
     menu.addAction(loadAct);
     menu.addAction(saveAct);
-
     //QPoint pt(pos);
     menu.exec( tree->mapToGlobal(pos) );
+
 }
 void MainWindow::slot_doHash()
 {

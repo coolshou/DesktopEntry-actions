@@ -27,3 +27,5 @@ FORMS    += mainwindow.ui \
 
 RESOURCES += \
     qhash.qrc
+
+OTHER_FILES +=
