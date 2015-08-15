@@ -44,9 +44,9 @@ HasherThread::HasherThread(QObject *parent , const QString &filename, QCryptogra
     pagesize = getpagesize();
 }
 
-void HasherThread::setIdx(int idx)
+void HasherThread::setItem(QTreeWidgetItem *itm)
 {
-    treeitemIdx = idx;
+    treeitem = itm;
 }
 
 void HasherThread::run()
@@ -61,7 +61,7 @@ void HasherThread::run()
     m_stop = false;
     QFile f( fullFileName );
     if ( !f.open(QIODevice::ReadOnly) ) {
-        emit error(treeitemIdx,  QString("Unable to open file %1").arg(fullFileName) );
+        emit error(treeitem,  QString("Unable to open file %1").arg(fullFileName) );
         return;
     }
 #if DEBUG_TEST_BUFFER_MODE == 1
@@ -71,13 +71,13 @@ void HasherThread::run()
 
 #ifdef DEBUG_TEST_TIME
     QDateTime sT =  QDateTime::currentDateTime();
-    emit error(treeitemIdx,  sT.toString("yyyy-MM-dd_HH:mm:ss"));
+    emit error(treeitem,  sT.toString("yyyy-MM-dd_HH:mm:ss"));
 #endif
 #if DEBUG_TEST_BUFFER_MODE == 1
     do {
         count = f.read( buffer, sizeof(buffer) );
         if ( count == -1 ) {
-            emit error(treeitemIdx,  QString("Read error") );
+            emit error(treeitem,  QString("Read error") );
             break;
         }
         //add hash data by read position
@@ -85,21 +85,21 @@ void HasherThread::run()
         iReadCount = iReadCount + count;
         //signal how many byte read
         iProgress = ((iReadCount *100) / size);
-        emit fileReadPos(treeitemIdx, iProgress);
+        emit fileReadPos(treeitem, iProgress);
     } while( !f.atEnd()  &&  (!m_stop));
     if (!m_stop) {
-        emit completed(treeitemIdx, hasher->result().toHex().toUpper() );
+        emit completed(treeitem, hasher->result().toHex().toUpper() );
     }
 #else
     //add by filename
         //connect(&f,SIGNAL(f.),this,filehashPos() );
         if (hasher->addData(&f)) {
-            emit completed(treeitemIdx, hasher->result().toHex().toUpper() );
+            emit completed(treeitem, hasher->result().toHex().toUpper() );
         }
 #endif
 #ifdef DEBUG_TEST_TIME
     QDateTime eT =  QDateTime::currentDateTime();
-    emit error(treeitemIdx,  eT.toString("yyyy-MM-dd_HH:mm:ss"));
+    emit error(treeitem,  eT.toString("yyyy-MM-dd_HH:mm:ss"));
 #endif
 //*/
     f.close();

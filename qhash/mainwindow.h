@@ -9,6 +9,7 @@
 #include <QCloseEvent>
 #include <QTime>
 #include <QClipboard>
+#include <QKeyEvent>
 
 #include "hasherthread.h"
 #include "progressbardelegate.h"
@@ -36,16 +37,18 @@ public:
     explicit MainWindow(int &argc, char **argv, QWidget *parent = 0);
     ~MainWindow();
     void setConfigFile(QString sFileName);
+    virtual void keyPressEvent(QKeyEvent *event);
 
 signals:
     void setThreadStop(bool bStop);
+    void KeyPressed();
 
 public slots:
     void slot_doHash();
-    void slot_setStatus(int idx, QString sMsg);
-    void slot_setError(int idx, QString sMsg);
-    void slot_setProgress(int idx, qint64 iPos);
-    void slot_setChecksum(int idx, QString chksum);
+    void slot_setStatus(QTreeWidgetItem *itm, QString sMsg);
+    void slot_setError(QTreeWidgetItem *itm, QString sMsg);
+    void slot_setProgress(QTreeWidgetItem *itm, qint64 iPos);
+    void slot_setChecksum(QTreeWidgetItem*itm, QString chksum);
     void slot_save();
     void slot_load();
     void slot_copyChecksum();
@@ -56,6 +59,7 @@ private slots:
     void slot_openOptions();
     void slot_saveOptions();
     void slot_loadOptions();
+    void slot_pressed();
 
 private:
     Ui::MainWindow *ui;
@@ -66,7 +70,7 @@ private:
     QString configFile;
     int  hashAlg;
     int isCheckMode; //0: calculate mode, 1: check mode
-    int addTopLevelItem(QString sName );
+    QTreeWidgetItem * addTopLevelItem(QString sName );
     int clearTopLevelItem();
     int  parserChechsumFile(QString sFileName);
     int parserMD5File(QString sFileName);

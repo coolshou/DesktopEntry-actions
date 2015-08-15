@@ -19,11 +19,12 @@ int MainWindow::clearTopLevelItem()
 }
 
 //return toplevelItem index number
-int MainWindow::addTopLevelItem(QString sName )
+//int MainWindow::addTopLevelItem(QString sName )
+QTreeWidgetItem * MainWindow::addTopLevelItem(QString sName )
 {
     //const int pageSize = getpagesize();
     //qDebug() << "pageSize:" << QString::number(pageSize);
-    int idx;
+    //int idx;
     QTreeWidgetItem * topLevelitem = new QTreeWidgetItem();
     topLevelitem->setText(COL_NAME, sName); //name
     qint64 size = 0;
@@ -34,7 +35,6 @@ int MainWindow::addTopLevelItem(QString sName )
         topLevelitem->setText(COL_SIZE,  QString::number(size)); //size
         topLevelitem->setTextAlignment(COL_SIZE, Qt::AlignRight);
         //add hasherThread,
-        //TODO: QCryptographicHash type
        HasherThread * hasherThread = new HasherThread( this ,  myFile.fileName(),QCryptographicHash::Algorithm(hashAlg));
        QVariant v;
        v.setValue(hasherThread);
@@ -44,6 +44,15 @@ int MainWindow::addTopLevelItem(QString sName )
         //topLevelitem->setText(COL_STATUS,  "TEST"); //test
         topLevelitem->setData(COL_CHECKSUM, MyCheckModeRole, isCheckMode); //default 0: calc mode, 1: check mode
 
+        connect( hasherThread, SIGNAL(error(QTreeWidgetItem*, const QString &)), this, SLOT(slot_setError(QTreeWidgetItem*,QString)) );
+        connect( hasherThread, SIGNAL(fileReadPos(QTreeWidgetItem*,qint64)), this, SLOT(slot_setProgress(QTreeWidgetItem*,qint64)) );
+        connect( this, SIGNAL(setThreadStop(bool)), hasherThread, SLOT(slot_setStop(bool)) );
+        connect( hasherThread, SIGNAL(completed(QTreeWidgetItem*, const QString &)), this, SLOT(slot_setChecksum(QTreeWidgetItem*,QString)) );
+
+        ui->treeWidget_files->addTopLevelItem(topLevelitem);
+        hasherThread->setItem(topLevelitem);
+//toplevelitem index may change? when item remove?!
+/*
         connect( hasherThread, SIGNAL(error(int, const QString &)), this, SLOT(slot_setError(int,QString)) );
         connect( hasherThread, SIGNAL(fileReadPos(int,qint64)), this, SLOT(slot_setProgress(int,qint64)) );
         connect( this, SIGNAL(setThreadStop(bool)), hasherThread, SLOT(slot_setStop(bool)) );
@@ -52,10 +61,11 @@ int MainWindow::addTopLevelItem(QString sName )
         ui->treeWidget_files->addTopLevelItem(topLevelitem);
         idx = ui->treeWidget_files->indexOfTopLevelItem(topLevelitem);
         hasherThread->setIdx(idx);
-
+*/
         myFile.close();
     }
-    return idx;
+    //return idx;
+    return topLevelitem;
 }
 
 MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
@@ -384,7 +394,7 @@ void  MainWindow::setConfigFile(QString sFileName)
 //TODO: md4, sha1, sha256, sha512 checksum file format?
 int MainWindow::parserMD5File(QString sFileName)
 {
-      int idx ;
+      int idx =0;
     //read file line by line
     QFile f(sFileName);
     //check file can be read
@@ -400,8 +410,9 @@ int MainWindow::parserMD5File(QString sFileName)
                // qDebug() << "1:" << fields.at(1);
                // qDebug() << "2:" << fields.at(2);//filename
 
-                idx =  addTopLevelItem( fields.at(2));
-                slot_setChecksum(idx, fields.at(0));
+                //idx =  addTopLevelItem( fields.at(2));
+                //slot_setChecksum(idx, fields.at(0));
+                slot_setChecksum(addTopLevelItem( fields.at(2)), fields.at(0));
                 /*
                 int row = fields.takeFirst().toInt();
                 int column = fields.takeFirst().toInt();
@@ -409,6 +420,7 @@ int MainWindow::parserMD5File(QString sFileName)
                 */
             }
             QApplication::processEvents();
+            idx++;
         }
         return idx;
     } else {
@@ -444,38 +456,83 @@ void MainWindow::p_slot_myDebug(QString msg)
     qDebug() << msg;
 }
 
-void MainWindow::slot_setError(int idx, QString sMsg)
+void MainWindow::slot_setError(QTreeWidgetItem *itm, QString sMsg)
 {
-    //QTreeWidgetItem * topLevelitem = ui->treeWidget_files->topLevelItem(idx);
+    int idx = ui->treeWidget_files->indexOfTopLevelItem(itm);
+    qDebug() << "TODO: error message: "<<QString::number(idx) << ": " <<sMsg;
     //topLevelitem->setText(COL_STATUS,sMsg);
-    qDebug() << QString::number(idx) << ": " <<sMsg;
+
 }
 
 
-void MainWindow::slot_setStatus(int idx, QString sMsg)
+void MainWindow::slot_setStatus(QTreeWidgetItem *itm, QString sMsg)
 {
-    QTreeWidgetItem * topLevelitem = ui->treeWidget_files->topLevelItem(idx);
-    topLevelitem->setText(COL_STATUS,sMsg);
+    QTreeWidgetItem * topLevelitem = NULL;
+   topLevelitem = itm;
+    if (topLevelitem !=NULL) {
+        topLevelitem->setText(COL_STATUS,sMsg);
+    }
 }
 
-void MainWindow::slot_setProgress(int idx, qint64 iPos)
+void MainWindow::slot_setProgress(QTreeWidgetItem *itm, qint64 iPos)
 {
-    slot_setStatus(idx, QString::number(iPos));
+    slot_setStatus(itm, QString::number(iPos));
 }
 
-void MainWindow::slot_setChecksum(int idx, QString chksum)
+void MainWindow::slot_setChecksum(QTreeWidgetItem *itm, QString chksum)
 {
     int cMode;
-   QTreeWidgetItem * topLevelitem = ui->treeWidget_files->topLevelItem(idx);
+   QTreeWidgetItem * topLevelitem = NULL;
+   topLevelitem = itm;
+    if (topLevelitem != NULL) {
+       cMode = topLevelitem->data(COL_CHECKSUM,MyCheckModeRole).toInt();
+       if (cMode==1) {
+           //TODO: checkmode?
+        topLevelitem->setTextColor(COL_CHECKSUM,Qt::gray);
+        qDebug() << "TODO: compare hash";
+       } else {
+         //calc mode?
+       }
+           //TODO: update status
+       topLevelitem->setText(COL_CHECKSUM,chksum);
+    }
+}
 
-   cMode = topLevelitem->data(COL_CHECKSUM,MyCheckModeRole).toInt();
-   if (cMode==1) {
-       //TODO: checkmode?
-    topLevelitem->setTextColor(COL_CHECKSUM,Qt::gray);
-    qDebug() << "TODO: compare hash";
-   } else {
-     //calc mode?
-   }
-       //TODO: update status
-   topLevelitem->setText(COL_CHECKSUM,chksum);
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    //QTreeWidget::keyPressEvent(event);
+    /*
+    if (event->key() == Qt::Key_Escape)
+    {
+        event->accept();
+        emit KeyPressed(); //send signal to QTreeWidgetItem
+    }
+    */
+
+    if ( event->key() == Qt::Key_Delete )
+     {
+      QList<QTreeWidgetItem *> selectedItems =  ui->treeWidget_files->selectedItems();
+
+      for (int i = 0; i < selectedItems.size(); ++i)
+      {
+       QTreeWidgetItem  *item = selectedItems.at(i);
+       int nDelIndex = ui->treeWidget_files->indexOfTopLevelItem (item);
+       QTreeWidgetItem *itemTop = ui->treeWidget_files->takeTopLevelItem(nDelIndex);
+       QVariant v = itemTop->data(COL_STATUS, MyHashThreadRole);
+       HasherThread * hasherT = v.value<HasherThread*>();
+       if (hasherT->isRunning()) {
+          hasherT->slot_setStop(true);
+       }
+       disconnect( hasherT, 0,0,0);
+       disconnect( this, SIGNAL(setThreadStop(bool)), hasherT, SLOT(slot_setStop(bool)) );
+        hasherT->deleteLater();
+       delete itemTop;
+      }
+     }
+
+}
+//QTreeWidgetItem slot
+void MainWindow::slot_pressed()
+{
+    qDebug() <<"//TODO:process your treewidgetitem when key press";
 }

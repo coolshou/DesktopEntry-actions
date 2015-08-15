@@ -5,6 +5,7 @@
 #include <QCryptographicHash>
 #include <QString>
 #include <QDateTime>
+#include <QTreeWidgetItem>
 
 class HasherThread : public QThread
 {
@@ -12,13 +13,13 @@ class HasherThread : public QThread
 public:
     explicit HasherThread(QObject *parent = 0, const QString &filename="", QCryptographicHash::Algorithm hMode = QCryptographicHash::Md5);
     void run();
-    void setIdx(int idx); //treeitem index
+    void setItem(QTreeWidgetItem *itm);
 
 signals:
-    void error(int idx, QString msg);
-    void completed(int idx, QString msg);
-    void fileSize(int idx, qint64 iSize);
-    void fileReadPos(int idx, qint64 iPos);
+    void error(QTreeWidgetItem *itm, QString msg);
+    void completed(QTreeWidgetItem *itm, QString msg);
+    void fileSize(QTreeWidgetItem *itm, qint64 iSize);
+    void fileReadPos(QTreeWidgetItem *itm, qint64 iPos);
 
 public slots:
     void slot_setStop(bool bStop);
@@ -30,7 +31,8 @@ private:
    QCryptographicHash *hasher;
    QString fullFileName;
    QCryptographicHash::Algorithm hashMode;
-   int treeitemIdx;
+//   int treeitemIdx;
+  QTreeWidgetItem *treeitem;
    bool m_stop ; //flag to tell thread stop
    int pagesize;
 };
