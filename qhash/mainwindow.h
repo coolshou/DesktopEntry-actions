@@ -37,7 +37,9 @@ public:
     explicit MainWindow(int &argc, char **argv, QWidget *parent = 0);
     ~MainWindow();
     void setConfigFile(QString sFileName);
+    void setCurrentPath(QString sPath);
     virtual void keyPressEvent(QKeyEvent *event);
+    QString getHashAlgString(int hAlg, bool bFilter=0);
 
 signals:
     void setThreadStop(bool bStop);
@@ -51,6 +53,7 @@ public slots:
     void slot_setChecksum(QTreeWidgetItem*itm, QString chksum);
     void slot_save();
     void slot_load();
+    void slot_add();
     void slot_copyChecksum();
 
 private slots:
@@ -68,6 +71,8 @@ private:
     QByteArray fileChecksum(const QString &fileName,
                             QCryptographicHash::Algorithm hashAlgorithm);
     QString configFile;
+    QDir currentDIR; //store current path
+    //QString currentPath; //store hashsum file path; or current running launch path
     int  hashAlg;
     int isCheckMode; //0: calculate mode, 1: check mode
     QTreeWidgetItem * addTopLevelItem(QString sName );

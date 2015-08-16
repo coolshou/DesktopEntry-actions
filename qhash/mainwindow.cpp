@@ -11,6 +11,7 @@
 
 QString SUPPORT_Filter("md4 files (*.md4);;md5 files (*.md5);;sha1 files (*.sha1);;sha256 files (*.sha256);;sha512 files (*.sha512)");
 QString DEFAULT_Filter("md5 files (*.md5)");
+QString ALL_FILE_Filter("All files (*.*)");
 
 int MainWindow::clearTopLevelItem()
 {
@@ -72,7 +73,7 @@ MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    //TODO: show UI position relative to mouse position or at center of screen?
+    //TODO: show UI position relative to mouse position or at center of screen? or load from setting
     isCheckMode=0;
     int i;
     int iParser=0;
@@ -80,12 +81,9 @@ MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
     //load config from config file
     slot_loadOptions();
     clipboard =  QApplication::clipboard();
-    /*
-    QString originalText = clipboard->text();
-    clipboard->setText( newText );
-    */
-    //QSettings *GlobalSettings = new QSettings(configFile,QSettings::NativeFormat);
-    //TODO: read config setting
+    /*    QString originalText = clipboard->text();
+            clipboard->setText( newText );     */
+
     //Delegate ProgressBar
     ui->treeWidget_files->setItemDelegateForColumn(COL_STATUS, new ProgressBarDelegate(ui->treeWidget_files));
 
@@ -118,7 +116,6 @@ MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
     QObject::connect(ui->pushButton_hash,SIGNAL(clicked()),this,SLOT(slot_doHash()));
     connect(ui->pushButton_option,SIGNAL(clicked()),this,SLOT(slot_openOptions()));
 
-    //delete GlobalSettings;
 }
 
 MainWindow::~MainWindow()
@@ -147,6 +144,9 @@ void MainWindow::slot_openOptions()
              break;
          case QCryptographicHash::Sha512:
              ui_option->radioButton_sha512->setChecked(true);
+             break;
+          default:
+             ui_option->radioButton_md5->setChecked(true);
              break;
      }
      ui_option->buttonBox->button(ui_option->buttonBox->Cancel)->setFocus();
@@ -227,9 +227,10 @@ void MainWindow::slot_save()
     qDebug() << "TODO: check we do have checksum to save and all hasherthread had done it's job";
 
     QFileDialog *fileDialog = new QFileDialog;
-//    fileDialog->setDefaultSuffix("md5");
+    //DefaultSuffix
+    fileDialog->setDefaultSuffix(getHashAlgString(hashAlg,true));
 
-    QString filename = fileDialog->getSaveFileName( this, "Save file", QDir::currentPath(), SUPPORT_Filter , &DEFAULT_Filter);
+    QString filename = fileDialog->getSaveFileName( this, "Save file",currentDIR.path(), SUPPORT_Filter , &DEFAULT_Filter);
     if (! (filename.endsWith(".md5", Qt::CaseInsensitive) ||
             filename.endsWith(".sha1", Qt::CaseInsensitive) )) {
         //TODO: md4, sha256, sha512
@@ -251,27 +252,34 @@ void MainWindow::slot_copyChecksum()
     QTreeWidget *tree = ui->treeWidget_files;
     clipboard->setText(tree->currentItem()->text(tree->currentColumn()));
 }
+//add file
+void MainWindow::slot_add()
+{
+    QString selfilter =getHashAlgString(hashAlg,true);
+    QStringList fileNames= QFileDialog::getOpenFileNames( this, "Add file", currentDIR.path(), ALL_FILE_Filter, &selfilter);
+    if (fileNames.count() >0 ) {
+        for (int i = 0; i < fileNames.size(); ++i) {
+             QString filename= fileNames.at(i).toUtf8().constData() ;
+             //change file path to relative path
+             filename = currentDIR.relativeFilePath(filename);
+             addTopLevelItem(filename);
+        }
+    }
+}
 //load checksum file
 void MainWindow::slot_load()
 {
-    //Load shecksum from file
-    QFileDialog *fileDialog = new QFileDialog(this, "Select file", QDir::currentPath(), SUPPORT_Filter );
-    fileDialog->setFileMode(QFileDialog::ExistingFile);
-    QStringList fileNames;
-    if (fileDialog->exec()) {
-       fileNames = fileDialog->selectedFiles();
-        if (fileNames.count() >0 ) {
-            //do we need multi file select?
-           QString filename = fileNames.first();
-            clearTopLevelItem();
-            parserChechsumFile(filename);
-        }
+    QString selfilter =getHashAlgString(hashAlg,true);
+    QString filename= QFileDialog::getOpenFileName(this, "Select file", currentDIR.path(), SUPPORT_Filter, &selfilter);
+    if (filename != "") {
+        setCurrentPath(currentDIR.filePath(filename));
+        clearTopLevelItem();
+        parserChechsumFile(filename);
     }
 }
 
 void MainWindow::p_slot_prepareRightClickMenu( const QPoint & pos )
 {
-    int curCol;
     QTreeWidget *tree = ui->treeWidget_files;
     //load
     QAction *loadAct = new QAction(QIcon(":/pixmaps/load.png"), tr("&Load"), this);
@@ -279,31 +287,24 @@ void MainWindow::p_slot_prepareRightClickMenu( const QPoint & pos )
     //save
     QAction *saveAct = new QAction(QIcon(":/pixmaps/save.png"), tr("&Save"), this);
     connect(saveAct, SIGNAL(triggered()), this, SLOT(slot_save()));
-    //add menu for copy checksum to clipboard
-    curCol = tree->currentColumn();
-    //if (curCol == COL_CHECKSUM) {
-    //copy
-        QAction *copyAct = new QAction(QIcon(":/pixmaps/copy.png"), tr("&Copy"), this);
-        connect(copyAct, SIGNAL(triggered()), this, SLOT(slot_copyChecksum()));
-    //}
-    //QTreeWidgetItem *itm =   tree->itemAt(pos.x(),pos.y);
-    //qDebug() << "QTreeWidgetItem" <<itm->text();
-    //TODO: add files menu item & action
-
-    //menu, first time right click will not show menu
-    /*
-    tree->setContextMenuPolicy(Qt::ActionsContextMenu);
-    tree->addAction(loadAct);
-    tree->addAction(saveAct);
-    */
+    //add file
+    QAction *addAct = new QAction(QIcon(":/pixmaps/add.png"), tr("&Add"), this);
+    connect(addAct, SIGNAL(triggered()), this, SLOT(slot_add()));
 
     //menu
     QMenu menu(this);
+    //add menu for copy checksum to clipboard
+    int curCol = tree->currentColumn();
     if (curCol == COL_CHECKSUM) {
-        menu.addAction(copyAct);
-        //TODO: add sepelate bar
-    }
+        QAction *copyAct = new QAction(QIcon(":/pixmaps/copy.png"), tr("&Copy"), this);
+        connect(copyAct, SIGNAL(triggered()), this, SLOT(slot_copyChecksum()));
 
+        menu.addAction(copyAct);
+        // add sepelate bar
+        menu.addSeparator();
+    }
+    menu.addAction(addAct);
+    menu.addSeparator();
     menu.addAction(loadAct);
     menu.addAction(saveAct);
     //QPoint pt(pos);
@@ -389,6 +390,41 @@ bool MainWindow::startHash()
 void  MainWindow::setConfigFile(QString sFileName)
 {
     configFile=sFileName;
+}
+void MainWindow::setCurrentPath(QString sPath)
+{
+    //currentPath = sPath;
+    currentDIR.setPath(sPath);
+}
+
+//return : hash mode string : md5 ...
+QString MainWindow::getHashAlgString(int hAlg, bool bFilter)
+{
+    QString hStr;
+    switch (hAlg) {
+        case QCryptographicHash::Md4:
+           hStr="md4";
+            break;
+        case QCryptographicHash::Md5:
+           hStr="md5";
+            break;
+        case QCryptographicHash::Sha1:
+            hStr="sha1";
+            break;
+        case QCryptographicHash::Sha256:
+            hStr="sha256";
+            break;
+        case QCryptographicHash::Sha512:
+            hStr="sha512";
+            break;
+        default:
+            hStr="md5";
+            break;
+    }
+    if (bFilter) {
+        hStr=  hStr + " files (*." + hStr+")";
+    }
+    return hStr;
 }
 
 //TODO: md4, sha1, sha256, sha512 checksum file format?
@@ -536,3 +572,4 @@ void MainWindow::slot_pressed()
 {
     qDebug() <<"//TODO:process your treewidgetitem when key press";
 }
+
