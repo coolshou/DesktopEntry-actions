@@ -169,9 +169,31 @@ void MainWindow::slot_openTools()
 void MainWindow::slot_hashString()
 {
     if (ui_tools->lineEdit_src->text().size() >0) {
-        QByteArray result = hash->hash(ui_tools->lineEdit_src->text().toUtf8() ,QCryptographicHash::Md5);
-        QString hashResult(result.toHex());
-        ui_tools->lineEdit_hash->setText(hashResult);
+        if (ui_tools->checkBox_md4->isChecked()) {
+            QByteArray result = hash->hash(ui_tools->lineEdit_src->text().toUtf8() ,QCryptographicHash::Md4);
+            QString hashResult(result.toHex());
+            ui_tools->lineEdit_md4->setText(hashResult);
+        }
+        if (ui_tools->checkBox_md5->isChecked()) {
+            QByteArray result = hash->hash(ui_tools->lineEdit_src->text().toUtf8() ,QCryptographicHash::Md5);
+            QString hashResult(result.toHex());
+            ui_tools->lineEdit_md5->setText(hashResult);
+        }
+        if (ui_tools->checkBox_sha1->isChecked()) {
+            QByteArray result = hash->hash(ui_tools->lineEdit_src->text().toUtf8() ,QCryptographicHash::Sha1);
+            QString hashResult(result.toHex());
+            ui_tools->lineEdit_sha1->setText(hashResult);
+        }
+        if (ui_tools->checkBox_sha256->isChecked()) {
+            QByteArray result = hash->hash(ui_tools->lineEdit_src->text().toUtf8() ,QCryptographicHash::Sha256);
+            QString hashResult(result.toHex());
+            ui_tools->lineEdit_sha256->setText(hashResult);
+        }
+        if (ui_tools->checkBox_sha512->isChecked()) {
+            QByteArray result = hash->hash(ui_tools->lineEdit_src->text().toUtf8() ,QCryptographicHash::Sha512);
+            QString hashResult(result.toHex());
+            ui_tools->lineEdit_sha512->setText(hashResult);
+        }
     }
 }
 
