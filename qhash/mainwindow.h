@@ -15,6 +15,7 @@
 #include "progressbardelegate.h"
 #include "customRoles.h"
 #include "ui_options.h"
+#include "ui_tools.h"
 
 //define
 enum {
@@ -63,10 +64,13 @@ private slots:
     void slot_saveOptions();
     void slot_loadOptions();
     void slot_pressed();
+    void slot_openTools();
+    void slot_hashString();
 
 private:
     Ui::MainWindow *ui;
     Ui::OptionsWindow *ui_option;
+    Ui::ToolsWindow *ui_tools;
     QClipboard* clipboard;
     QByteArray fileChecksum(const QString &fileName,
                             QCryptographicHash::Algorithm hashAlgorithm);
@@ -84,7 +88,7 @@ private:
     void closeEvent(QCloseEvent *event);
     bool checkThreadStoped();
     void delay( int millisecondsToWait );
-
+    QCryptographicHash* hash;
 };
 
 #endif // MAINWINDOW_H

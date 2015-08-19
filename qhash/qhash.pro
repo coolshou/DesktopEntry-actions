@@ -23,7 +23,8 @@ HEADERS  += mainwindow.h \
     customRoles.h
 
 FORMS    += mainwindow.ui \
-    options.ui
+    options.ui \
+    tools.ui
 
 RESOURCES += \
     qhash.qrc

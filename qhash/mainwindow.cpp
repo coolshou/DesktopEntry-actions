@@ -115,6 +115,7 @@ MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
     //signal/solt of button push
     QObject::connect(ui->pushButton_hash,SIGNAL(clicked()),this,SLOT(slot_doHash()));
     connect(ui->pushButton_option,SIGNAL(clicked()),this,SLOT(slot_openOptions()));
+    connect(ui->pushButton_tool,SIGNAL(clicked()),this,SLOT(slot_openTools()));
 
 }
 
@@ -154,6 +155,24 @@ void MainWindow::slot_openOptions()
      connect(ui_option->buttonBox->button((QDialogButtonBox::Ok)), SIGNAL(clicked()), this, SLOT(slot_saveOptions()));
     //show options dialog
     dialog->show();
+}
+
+void MainWindow::slot_openTools()
+{
+    ui_tools = new Ui::ToolsWindow;
+    QDialog *dialog = new QDialog;
+    ui_tools->setupUi(dialog);
+    //signal/slot
+    connect(ui_tools->pushButton_hash,SIGNAL(clicked()),this,SLOT(slot_hashString()));
+    dialog->show();
+}
+void MainWindow::slot_hashString()
+{
+    if (ui_tools->lineEdit_src->text().size() >0) {
+        QByteArray result = hash->hash(ui_tools->lineEdit_src->text().toUtf8() ,QCryptographicHash::Md5);
+        QString hashResult(result.toHex());
+        ui_tools->lineEdit_hash->setText(hashResult);
+    }
 }
 
 //save options settings
