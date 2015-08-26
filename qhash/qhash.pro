@@ -30,3 +30,11 @@ RESOURCES += \
     qhash.qrc
 
 OTHER_FILES +=
+
+target.path = /usr/bin/
+desktop.path = /usr/share/applications/
+desktop.files += qhash.desktop
+images.path = /usr/share/pixmaps/
+images.files += pixmaps/qhash.png
+
+INSTALLS += target desktop images
