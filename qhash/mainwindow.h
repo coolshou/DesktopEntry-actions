@@ -56,6 +56,7 @@ public slots:
     void slot_load();
     void slot_add();
     void slot_copyChecksum();
+    void slot_copyLowChecksum();
 
 private slots:
     void p_slot_myDebug(QString msg);

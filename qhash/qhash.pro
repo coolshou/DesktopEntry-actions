@@ -32,6 +32,7 @@ RESOURCES += \
 OTHER_FILES +=
 
 target.path = /usr/bin/
+actions.files = qhash-action.desktop
 desktop.path = /usr/share/applications/
 desktop.files += qhash.desktop
 images.path = /usr/share/pixmaps/

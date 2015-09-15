@@ -293,6 +293,13 @@ void MainWindow::slot_copyChecksum()
     QTreeWidget *tree = ui->treeWidget_files;
     clipboard->setText(tree->currentItem()->text(tree->currentColumn()));
 }
+// copy checksum value in lower case
+void MainWindow::slot_copyLowChecksum()
+{
+    QTreeWidget *tree = ui->treeWidget_files;
+    clipboard->setText(tree->currentItem()->text(tree->currentColumn()).toLower());
+}
+
 //add file
 void MainWindow::slot_add()
 {
@@ -339,8 +346,11 @@ void MainWindow::p_slot_prepareRightClickMenu( const QPoint & pos )
     if (curCol == COL_CHECKSUM) {
         QAction *copyAct = new QAction(QIcon(":/pixmaps/copy.png"), tr("&Copy"), this);
         connect(copyAct, SIGNAL(triggered()), this, SLOT(slot_copyChecksum()));
+        QAction *copylAct = new QAction(QIcon(":/pixmaps/copy.png"), tr("&Copy Lower Case"), this);
+        connect(copylAct, SIGNAL(triggered()), this, SLOT(slot_copyLowChecksum()));
 
         menu.addAction(copyAct);
+        menu.addAction(copylAct);
         // add sepelate bar
         menu.addSeparator();
     }
