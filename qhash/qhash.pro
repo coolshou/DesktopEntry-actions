@@ -29,7 +29,8 @@ FORMS    += mainwindow.ui \
 RESOURCES += \
     qhash.qrc
 
-OTHER_FILES +=
+OTHER_FILES += \
+    qhash-action.desktop
 
 target.path = /usr/bin/
 actions.files = qhash-action.desktop
