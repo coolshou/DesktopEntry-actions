@@ -13,6 +13,6 @@ enum MyDataRoles {
 
 //config key
 #define CFG_KEY_HashAlg "hashAlg"
-
+#define CFG_KEY_HashUppercase "hashUppercase"
 
 #endif // CUSTOMROLES_H

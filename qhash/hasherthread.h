@@ -11,7 +11,8 @@ class HasherThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit HasherThread(QObject *parent = 0, const QString &filename="", QCryptographicHash::Algorithm hMode = QCryptographicHash::Md5);
+    explicit HasherThread(QObject *parent = 0, const QString &filename="",
+                          QCryptographicHash::Algorithm hMode = QCryptographicHash::Md5);
     void run();
     void setItem(QTreeWidgetItem *itm);
 

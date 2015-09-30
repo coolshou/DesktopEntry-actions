@@ -35,7 +35,8 @@ QCryptographicHash::Sha3_512	10	Generate an SHA3-512 hash sum. Introduced in Qt 
 //#define BEST_BUFFER_SIZE 2048 //8M :
 //#define BEST_BUFFER_SIZE 10240*1024 //5.1G need ? => core dump!! why?
 
-HasherThread::HasherThread(QObject *parent , const QString &filename, QCryptographicHash::Algorithm hMode) :
+HasherThread::HasherThread(QObject *parent , const QString &filename,
+                           QCryptographicHash::Algorithm hMode) :
     QThread(parent)
 {
     hashMode = hMode;
@@ -94,7 +95,7 @@ void HasherThread::run()
     //add by filename
         //connect(&f,SIGNAL(f.),this,filehashPos() );
         if (hasher->addData(&f)) {
-            emit completed(treeitem, hasher->result().toHex().toUpper() );
+                emit completed(treeitem, hasher->result().toHex().toUpper() );
         }
 #endif
 #ifdef DEBUG_TEST_TIME

@@ -79,6 +79,7 @@ private:
     QDir currentDIR; //store current path
     //QString currentPath; //store hashsum file path; or current running launch path
     int  hashAlg;
+    bool hashUppercase;
     int isCheckMode; //0: calculate mode, 1: check mode
     QTreeWidgetItem * addTopLevelItem(QString sName );
     int clearTopLevelItem();

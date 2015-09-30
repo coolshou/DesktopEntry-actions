@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>200</height>
+    <height>220</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -22,11 +22,11 @@
   <property name="maximumSize">
    <size>
     <width>300</width>
-    <height>200</height>
+    <height>220</height>
    </size>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Options</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
@@ -162,6 +162,13 @@ QGroupBox::title {
          </item>
         </layout>
        </widget>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBox_hashUppercase">
+       <property name="text">
+        <string>Hash in uppercase</string>
+       </property>
       </widget>
      </item>
      <item>

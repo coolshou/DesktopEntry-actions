@@ -150,6 +150,8 @@ void MainWindow::slot_openOptions()
              ui_option->radioButton_md5->setChecked(true);
              break;
      }
+     ui_option->checkBox_hashUppercase->setChecked(hashUppercase);
+
      ui_option->buttonBox->button(ui_option->buttonBox->Cancel)->setFocus();
      //signal/slot
      connect(ui_option->buttonBox->button((QDialogButtonBox::Ok)), SIGNAL(clicked()), this, SLOT(slot_saveOptions()));
@@ -218,10 +220,12 @@ void MainWindow::slot_saveOptions()
     } else {
             hashAlg = QCryptographicHash::Md5;
     }
+    hashUppercase = ui_option->checkBox_hashUppercase->isChecked();
 
     QSettings *GlobalSettings = new QSettings(configFile,QSettings::NativeFormat);
     GlobalSettings->beginGroup("hash");
     GlobalSettings->setValue(CFG_KEY_HashAlg, hashAlg);
+    GlobalSettings->setValue(CFG_KEY_HashUppercase, hashUppercase);
     GlobalSettings->endGroup();
     delete GlobalSettings;
 }
@@ -231,6 +235,7 @@ void MainWindow::slot_loadOptions()
     QSettings *GlobalSettings = new QSettings(configFile,QSettings::NativeFormat);
     GlobalSettings->beginGroup("hash");
     hashAlg =  GlobalSettings->value(CFG_KEY_HashAlg,QCryptographicHash::Md5).toInt();
+    hashUppercase =  GlobalSettings->value(CFG_KEY_HashUppercase,false).toBool();
     GlobalSettings->endGroup();
     delete GlobalSettings;
 }
@@ -489,22 +494,36 @@ int MainWindow::parserMD5File(QString sFileName)
         QTextStream in(&f);
         while (!in.atEnd()) {
             QString line = in.readLine();
-            //TODO: binary mode
-            QStringList fields = line.split(' ');
-            //qDebug() << "fields" << fields;
-            if (fields.size() == 3) {
-               // qDebug() << "0:" << fields.at(0); //checksum
-               // qDebug() << "1:" << fields.at(1);
-               // qDebug() << "2:" << fields.at(2);//filename
+            bool binMode = line.contains("*");
+            if (binMode) {
+              //TODO: binary mode
+                QStringList fields = line.split('*');
+                if (fields.size() == 2) {
+                    //qDebug() << "0:" << fields.at(0); //checksum
+                    //qDebug() << "1:" << fields.at(1);//filename
+                    slot_setChecksum(addTopLevelItem( fields.at(1).trimmed()), fields.at(0).trimmed());
+                } else {
+                    qDebug() << "unknown md5 file format (binary mode)";
+                }
+            } else {
+                QStringList fields = line.split(' ');
+                //qDebug() << "fields" << fields;
+                if (fields.size() == 3) {
+                   // qDebug() << "0:" << fields.at(0); //checksum
+                   // qDebug() << "1:" << fields.at(1);
+                   // qDebug() << "2:" << fields.at(2);//filename
 
-                //idx =  addTopLevelItem( fields.at(2));
-                //slot_setChecksum(idx, fields.at(0));
-                slot_setChecksum(addTopLevelItem( fields.at(2)), fields.at(0));
-                /*
-                int row = fields.takeFirst().toInt();
-                int column = fields.takeFirst().toInt();
-                setFormula(row, column, fields.join(' '));
-                */
+                    //idx =  addTopLevelItem( fields.at(2));
+                    //slot_setChecksum(idx, fields.at(0));
+                    slot_setChecksum(addTopLevelItem( fields.at(2).trimmed()), fields.at(0).trimmed());
+                    /*
+                    int row = fields.takeFirst().toInt();
+                    int column = fields.takeFirst().toInt();
+                    setFormula(row, column, fields.join(' '));
+                    */
+                } else {
+                    qDebug() << "unknown md5 file format";
+                }
             }
             QApplication::processEvents();
             idx++;
@@ -579,9 +598,14 @@ void MainWindow::slot_setChecksum(QTreeWidgetItem *itm, QString chksum)
         qDebug() << "TODO: compare hash";
        } else {
          //calc mode?
+        topLevelitem->setTextColor(COL_CHECKSUM,Qt::black);
        }
            //TODO: update status
-       topLevelitem->setText(COL_CHECKSUM,chksum);
+       if (hashUppercase) {
+        topLevelitem->setText(COL_CHECKSUM,chksum.toUpper());
+       } else {
+        topLevelitem->setText(COL_CHECKSUM,chksum.toLower());
+       }
     }
 }
 
