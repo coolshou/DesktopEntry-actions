@@ -69,7 +69,7 @@ QTreeWidgetItem * MainWindow::addTopLevelItem(QString sName )
     return topLevelitem;
 }
 
-MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
+MainWindow::MainWindow(int &argc, char **argv, QString cfgFile, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
@@ -79,6 +79,7 @@ MainWindow::MainWindow(int &argc, char **argv, QWidget *parent) :
     int iParser=0;
     ui->setupUi(this);
     //load config from config file
+    configFile = cfgFile;
     slot_loadOptions();
     clipboard =  QApplication::clipboard();
     /*    QString originalText = clipboard->text();
@@ -225,7 +226,7 @@ void MainWindow::slot_saveOptions()
     QSettings *GlobalSettings = new QSettings(configFile,QSettings::NativeFormat);
     GlobalSettings->beginGroup("hash");
     GlobalSettings->setValue(CFG_KEY_HashAlg, hashAlg);
-    GlobalSettings->setValue(CFG_KEY_HashUppercase, hashUppercase);
+    GlobalSettings->setValue(CFG_KEY_HashUppercase, hashUppercase?1:0);
     GlobalSettings->endGroup();
     delete GlobalSettings;
 }

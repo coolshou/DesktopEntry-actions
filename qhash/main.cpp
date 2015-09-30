@@ -15,9 +15,9 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     app.setApplicationName(AppName);
     app.setApplicationVersion(AppVersion);
+    QString cfgFile =QString("%1%2%3%4%5").arg(QDir::homePath(), "/.local/",AppName, "/", "qhash.conf");
 
-    MainWindow w(argc, argv);
-    w.setConfigFile(QString("%1%2%3%4%5").arg(QDir::homePath(), "/.local/",AppName, "/", "qhash.conf"));
+    MainWindow w(argc, argv, cfgFile);
 //qDebug() << "applicationDirPath" <<app.applicationDirPath();
     w.setCurrentPath(app.applicationDirPath());
     w.show();
