@@ -46,6 +46,7 @@ QTreeWidgetItem * MainWindow::addTopLevelItem(QString sName )
         topLevelitem->setData(COL_CHECKSUM, MyCheckModeRole, isCheckMode); //default 0: calc mode, 1: check mode
 
         connect( hasherThread, SIGNAL(error(QTreeWidgetItem*, const QString &)), this, SLOT(slot_setError(QTreeWidgetItem*,QString)) );
+        connect( hasherThread, SIGNAL(msg(QTreeWidgetItem*, const QString &)), this, SLOT(slot_setMsg(QTreeWidgetItem*,QString)) );
         connect( hasherThread, SIGNAL(fileReadPos(QTreeWidgetItem*,qint64)), this, SLOT(slot_setProgress(QTreeWidgetItem*,qint64)) );
         connect( this, SIGNAL(setThreadStop(bool)), hasherThread, SLOT(slot_setStop(bool)) );
         connect( hasherThread, SIGNAL(completed(QTreeWidgetItem*, const QString &)), this, SLOT(slot_setChecksum(QTreeWidgetItem*,QString)) );
@@ -571,6 +572,13 @@ void MainWindow::slot_setError(QTreeWidgetItem *itm, QString sMsg)
 
 }
 
+void MainWindow::slot_setMsg(QTreeWidgetItem *itm, QString sMsg)
+{
+    int idx = ui->treeWidget_files->indexOfTopLevelItem(itm);
+    qDebug() << "message: "<<QString::number(idx) << ": " <<sMsg;
+    //topLevelitem->setText(COL_STATUS,sMsg);
+
+}
 
 void MainWindow::slot_setStatus(QTreeWidgetItem *itm, QString sMsg)
 {

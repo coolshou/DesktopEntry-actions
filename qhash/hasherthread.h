@@ -18,6 +18,7 @@ public:
 
 signals:
     void error(QTreeWidgetItem *itm, QString msg);
+    void msg(QTreeWidgetItem *itm, QString msg);
     void completed(QTreeWidgetItem *itm, QString msg);
     void fileSize(QTreeWidgetItem *itm, qint64 iSize);
     void fileReadPos(QTreeWidgetItem *itm, qint64 iPos);
