@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Action
+Tooltip=Compare files/folder with bcompare
+Name=Compare with bcompare
+Name[zh_TW]=以bcompare比較
+Profiles=profile-bcompare
+Icon=bcompare
+
+[X-Action-Profile profile-bcompare]
+Name=Compare with bcompare
+Exec=bcompare %F
+
