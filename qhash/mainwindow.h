@@ -50,6 +50,7 @@ public slots:
     void slot_doHash();
     void slot_setStatus(QTreeWidgetItem *itm, QString sMsg);
     void slot_setError(QTreeWidgetItem *itm, QString sMsg);
+    void slot_setMsg(QTreeWidgetItem *itm, QString sMsg);
     void slot_setProgress(QTreeWidgetItem *itm, qint64 iPos);
     void slot_setChecksum(QTreeWidgetItem*itm, QString chksum);
     void slot_save();

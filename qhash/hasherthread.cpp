@@ -70,9 +70,9 @@ void HasherThread::run()
 #endif
     hasher->reset();
 
-#ifdef DEBUG_TEST_TIME
+#if DEBUG_TEST_TIME == 1
     QDateTime sT =  QDateTime::currentDateTime();
-    emit error(treeitem,  sT.toString("yyyy-MM-dd_HH:mm:ss"));
+    emit msg(treeitem,  "Start: " + sT.toString("yyyy-MM-dd_HH:mm:ss zzz"));
 #endif
 #if DEBUG_TEST_BUFFER_MODE == 1
     do {
@@ -98,9 +98,9 @@ void HasherThread::run()
                 emit completed(treeitem, hasher->result().toHex().toUpper() );
         }
 #endif
-#ifdef DEBUG_TEST_TIME
+#if DEBUG_TEST_TIME == 1
     QDateTime eT =  QDateTime::currentDateTime();
-    emit error(treeitem,  eT.toString("yyyy-MM-dd_HH:mm:ss"));
+    emit msg(treeitem,  "Finish: " + eT.toString("yyyy-MM-dd_HH:mm:ss zzz"));
 #endif
 //*/
     f.close();
