@@ -13,3 +13,5 @@ Desktop Entry of actions for pcmanfm like file manager application
 
  Place relative script file to ~/bin/
  setup PATH=$PATH:~/bin/
+
+# install bcompare
