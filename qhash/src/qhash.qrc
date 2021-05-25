@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>../pixmaps/qhash.png</file>
+        <file>../pixmaps/save.png</file>
+        <file>../pixmaps/load.png</file>
+        <file>../pixmaps/check.png</file>
+        <file>../pixmaps/cross.png</file>
+        <file>../pixmaps/copy.png</file>
+        <file>../pixmaps/gray.png</file>
+    </qresource>
+</RCC>

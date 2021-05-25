@@ -138,7 +138,7 @@
           <string>Name</string>
          </property>
          <property name="textAlignment">
-          <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+          <set>AlignCenter</set>
          </property>
         </column>
         <column>
@@ -146,7 +146,7 @@
           <string>Size</string>
          </property>
          <property name="textAlignment">
-          <set>AlignRight|AlignVCenter</set>
+          <set>AlignTrailing|AlignVCenter</set>
          </property>
         </column>
         <column>
@@ -154,7 +154,7 @@
           <string>Status</string>
          </property>
          <property name="textAlignment">
-          <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+          <set>AlignCenter</set>
          </property>
         </column>
         <column>

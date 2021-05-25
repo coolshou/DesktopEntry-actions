@@ -104,6 +104,9 @@ MainWindow::MainWindow(int &argc, char **argv, QString cfgFile, QWidget *parent)
                 //TODO: parser many file will need times => move to thread?
                 QApplication::processEvents();
             }
+            // TODO: get app lunch path
+            QFileInfo fi(argv[1]);
+            setCurrentPath(fi.path());
         }
     } else {
         //
@@ -310,8 +313,9 @@ void MainWindow::slot_copyLowChecksum()
 //add file
 void MainWindow::slot_add()
 {
-    QString selfilter =getHashAlgString(hashAlg,true);
-    QStringList fileNames= QFileDialog::getOpenFileNames( this, "Add file", currentDIR.path(), ALL_FILE_Filter, &selfilter);
+//    QString selfilter =getHashAlgString(hashAlg,true);
+    //QStringList fileNames= QFileDialog::getOpenFileNames( this, "Add file", currentDIR.path(), ALL_FILE_Filter, &selfilter);
+    QStringList fileNames= QFileDialog::getOpenFileNames( this, "Add file", currentDIR.path(), ALL_FILE_Filter);
     if (fileNames.count() >0 ) {
         for (int i = 0; i < fileNames.size(); ++i) {
              QString filename= fileNames.at(i).toUtf8().constData() ;
@@ -438,6 +442,7 @@ bool MainWindow::startHash()
             //get hasherthread
             QVariant v = topLevelitem->data(COL_STATUS, MyHashThreadRole);
             HasherThread * hasherT = v.value<HasherThread*>();
+            hasherT->setMode(hashAlg);
             hasherT->start();
             QApplication::processEvents();
         }

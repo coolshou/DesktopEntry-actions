@@ -15,7 +15,7 @@ public:
                           QCryptographicHash::Algorithm hMode = QCryptographicHash::Md5);
     void run();
     void setItem(QTreeWidgetItem *itm);
-
+    void setMode(int hMode);
 signals:
     void error(QTreeWidgetItem *itm, QString msg);
     void msg(QTreeWidgetItem *itm, QString msg);

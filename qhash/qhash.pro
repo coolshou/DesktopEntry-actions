@@ -11,23 +11,25 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = qhash
 TEMPLATE = app
 
+# make app as exec not shared library
+QMAKE_LFLAGS += -no-pie
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    hasherthread.cpp \
-    progressbardelegate.cpp
+SOURCES += src/main.cpp\
+        src/mainwindow.cpp \
+    src/hasherthread.cpp \
+    src/progressbardelegate.cpp
 
-HEADERS  += mainwindow.h \
-    hasherthread.h \
-    progressbardelegate.h \
-    customRoles.h
+HEADERS  += src/mainwindow.h \
+    src/hasherthread.h \
+    src/progressbardelegate.h \
+    src/customRoles.h
 
-FORMS    += mainwindow.ui \
-    options.ui \
-    tools.ui
+FORMS    += src/mainwindow.ui \
+    src/options.ui \
+    src/tools.ui
 
 RESOURCES += \
-    qhash.qrc
+    src/qhash.qrc
 
 OTHER_FILES += \
     qhash-action.desktop

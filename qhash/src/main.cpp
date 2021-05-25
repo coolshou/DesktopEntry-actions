@@ -7,7 +7,7 @@
 
 const QString AppName = "qhash";
 const QString AppMajorVersion = "0";
-const QString AppMinorVersion = "2";
+const QString AppMinorVersion = "3";
 const QString AppVersion = AppMajorVersion + "." + AppMinorVersion;
 
 int main(int argc, char *argv[])

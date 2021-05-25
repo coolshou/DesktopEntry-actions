@@ -39,8 +39,9 @@ HasherThread::HasherThread(QObject *parent , const QString &filename,
                            QCryptographicHash::Algorithm hMode) :
     QThread(parent)
 {
-    hashMode = hMode;
-    hasher = new QCryptographicHash( hashMode );
+    setMode(hMode);
+//    hashMode = hMode;
+//    hasher = new QCryptographicHash( hashMode );
     fullFileName = filename;
     pagesize = getpagesize();
 }
@@ -48,6 +49,12 @@ HasherThread::HasherThread(QObject *parent , const QString &filename,
 void HasherThread::setItem(QTreeWidgetItem *itm)
 {
     treeitem = itm;
+}
+
+void HasherThread::setMode(int hMode)
+{
+    hashMode = QCryptographicHash::Algorithm(hMode);
+    hasher = new QCryptographicHash(hashMode);
 }
 
 void HasherThread::run()
