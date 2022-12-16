@@ -1,0 +1,20 @@
+[Desktop Entry]
+Type=Action
+Tooltip=add files to git
+Name=add to git
+Name[zh_TW]=加入git
+Profiles=profile-add
+Icon=git.png
+
+[X-Action-Profile profile-add]
+Name=add to git
+Exec=git add %F
+Icon=add-git.png
+
+[X-Action-Profile profile-pull]
+Name=git pull
+Exec=git pull
+
+[X-Action-Profile profile-push]
+Name=git push
+Exec=git push
