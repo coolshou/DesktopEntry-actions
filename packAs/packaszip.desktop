@@ -1,0 +1,18 @@
+[Desktop Entry]
+Type=Action
+Tooltip=Pack files/directory as zip file at here
+Name=Pack as zip
+Name[zh_TW]=壓縮為 zip
+Profiles=profile-zip;profile-zero
+Icon=ark
+
+[X-Action-Profile profile-zip]
+Name=Pack as Zip
+#Exec=file-roller -a %f.zip %F
+Exec=lxqt-archiver -a %f.zip %F
+
+[X-Action-Profile profile-zero]
+MimeTypes=inode/directory;
+#Exec=ark -p -o . --add --dialog %u
+Exec=lxqt-archiver -d --default-dir . --add %u
+Name=Compress as Zip
