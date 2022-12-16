@@ -15,3 +15,7 @@ Desktop Entry of actions for pcmanfm like file manager application
  setup PATH=$PATH:~/bin/
 
 # install bcompare
+
+
+# install Templates
+place file to ~/Templates/
