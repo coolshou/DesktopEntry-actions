@@ -8,7 +8,12 @@ Icon=git.png
 
 [X-Action-Profile profile-add]
 Name=add to git
-Exec=git add %F
+Exec=gitmanager.sh add %F
+Icon=add-git.png
+
+[X-Action-Profile profile-rm]
+Name=remove from git
+Exec=gitmanager.sh rm %F
 Icon=add-git.png
 
 [X-Action-Profile profile-pull]
