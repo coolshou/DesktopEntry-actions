@@ -262,7 +262,7 @@ void MainWindow::saveMD5file(QString filename)
         QTreeWidget *tree = ui->treeWidget_files;
         for (int i=0;i<tree->topLevelItemCount();i++){
             QTreeWidgetItem * topLevelitem = tree->topLevelItem(i);
-            out << topLevelitem->text(COL_CHECKSUM) << "  " << topLevelitem->text(COL_NAME) << endl;
+            out << topLevelitem->text(COL_CHECKSUM) << "  " << topLevelitem->text(COL_NAME) << Qt::endl;
             QApplication::processEvents();
         }
         f.close();
@@ -608,11 +608,12 @@ void MainWindow::slot_setChecksum(QTreeWidgetItem *itm, QString chksum)
        cMode = topLevelitem->data(COL_CHECKSUM,MyCheckModeRole).toInt();
        if (cMode==1) {
            //TODO: checkmode?
-        topLevelitem->setTextColor(COL_CHECKSUM,Qt::gray);
+        //topLevelitem->setTextColor(COL_CHECKSUM,Qt::gray);
+	topLevelitem->setForeground(COL_CHECKSUM,Qt::gray);
         qDebug() << "TODO: compare hash";
        } else {
          //calc mode?
-        topLevelitem->setTextColor(COL_CHECKSUM,Qt::black);
+        topLevelitem->setForeground(COL_CHECKSUM,Qt::black);
        }
            //TODO: update status
        if (hashUppercase) {
