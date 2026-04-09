@@ -8,11 +8,10 @@ Icon=ark
 
 [X-Action-Profile profile-zip]
 Name=Pack as Zip
-#Exec=file-roller -a %f.zip %F
-Exec=lxqt-archiver -a %f.zip %F
+#Exec=lxqt-archiver -a %f.zip %F
+Exec=lxqt-archiver -d %F -a %f.zip
 
 [X-Action-Profile profile-zero]
 MimeTypes=inode/directory;
-#Exec=ark -p -o . --add --dialog %u
-Exec=lxqt-archiver -d --default-dir . --add %u
+Exec=lxqt-archiver --add %F
 Name=Compress as Zip
