@@ -5,6 +5,13 @@ Name=qhash
 Name[zh_TW]=qhash
 Comment=QT base check/calculate checksum
 Icon=qhash
-exec=qhash
+Exec=qhash %F
 Terminal=false
 Categories=QT;
+X-MultipleArgs=false
+Categories=QT;Utility;
+MimeType=text/md4;text/md5;text/sha1;text/sha256;text/sha512;
+Keywords=md4;md5;sha1;sha256;sha512;
+StartupWMClass=qhash
+StartupNotify=true
+
